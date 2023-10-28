@@ -1,0 +1,11 @@
+flask
+requests
+transformers
+
+torch
+
+langchain
+tiktoken
+faiss-cpu
+
+accelerate
