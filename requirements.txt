@@ -1,6 +1,6 @@
 flask
 requests
-transformers
+transformers[sentencepiece]
 
 torch
 
@@ -9,3 +9,16 @@ tiktoken
 faiss-cpu
 
 accelerate
+
+pinecone-client
+sentence_transformers
+
+tiktoken==0.4.0
+tokenizers==0.13.3
+PyPDF2
+python-dotenv
+pypdf
+
+openai
+
+asyncio
