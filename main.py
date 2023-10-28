@@ -56,7 +56,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/upload', methods=['POST'])
+@app.route('/')
+def root():
+    return jsonify({'home':True})
+
+@app.route('/upload_file', methods=['POST','GET'])
 def upload_file():
     if 'file' not in request.files:
         return redirect(request.url)
@@ -73,85 +77,20 @@ def upload_file():
 
     return 'Invalid file format. Please upload a PDF file.'
 
-
-# @app.route("/result", methods=["GET", "POST"])
-
-# def get_ans():
-#     if request.method=='POST':
-
-#         query = request.get_json()
-
-#         if not query:
-#             return jsonify({"error": "No query provided"})
-
-#         model = SentenceTransformer("sentence-transformers/multi-qa-mpnet-base-dot-v1")
-#         try:
-#             embed = model.encode(query, convert_to_tensor=True)   #not for OAI
-            
-#             # print(type(embed.numpy()))
-
-#             result_list = [float(element) for element in embed.numpy()[0]]
-#             resp = index.query(
-#                 vector=result_list,
-#                 top_k=1,
-#                 include_values=False,
-#                 include_metadata=True,
-#             ).matches[0].metadata   
-#             return jsonify(resp['text']),200
-
-#         except Exception as e:
-#             print(e)
-#             return jsonify({"error": str(e)}),400
-
-model = SentenceTransformer("sentence-transformers/multi-qa-mpnet-base-dot-v1")
-# Load or create your Faiss index and make sure it's available in the 'index' variable.
-
-def get_ans(query):
-    embed = model.encode(query, convert_to_tensor=True)
-
-    result_list = [float(element) for element in embed.numpy()[0]]
-    # result_list = embed.numpy().tolist()[0]
-    index = pinecone.Index('dh')
-    resp = index.query(
-        vector=result_list,
-        top_k=1,
-        include_values=False,
-        include_metadata=True,
-    ).matches[0].metadata
-    return resp['text']
-
-@app.route('/result', methods=['POST'])
-def query():
+@app.route('/result', methods=['POST','GET'])
+def result():
     try:
-        data = request.get_json()
-        query = data['query']
-        response = get_ans(query)
-
-        response = get_ans(query)
-        return jsonify({"response": response})
+        # data = request.args.get('query')
+        user_query = request.form['query']
+        print(user_query)
+        response = get_ans(user_query)
+        return jsonify({"response": str(response)})
     except Exception as e:
         return jsonify({"error": str(e)})
 
-    
-def restructure(query, ans):
-  api_key = "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"
-  response = openai.ChatCompletion.create(
-  model="gpt-3.5-turbo",
-  messages=[{
-      "role": "system",
-      "content": f'The answer to the question {query} recieved by performing similarity search on a document gave the answer {ans}. Based on the question, restructure the ans in a suitable answer for the user'
-    }],
-  api_key=api_key,
-  temperature=1,
-  max_tokens=256,
-  top_p=1,
-  frequency_penalty=0,
-  presence_penalty=0
-  )
-  return response.choices[0].message.content
 
-@app.route("/restructure", methods=["POST"])
-def restructure_route():
+@app.route("/restructure", methods=["POST","GET"])
+def restructure():
     response = request.get('/result')
     if response.status_code == 200:
         query = request.get_json().get("query")  # Get the query from the request JSON
@@ -165,6 +104,42 @@ def restructure_route():
 
     return jsonify({"restructured_answer": restructured_answer})
 
+model = SentenceTransformer("sentence-transformers/multi-qa-mpnet-base-dot-v1")
+# Load or create your Faiss index and make sure it's available in the 'index' variable.
+
+def get_ans(query):
+    embed = model.encode(query, convert_to_tensor=True)
+
+    # result_list = embed.numpy().astype(float).tolist()
+    result_list = [float(element) for element in embed.numpy()[0]]
+    # result_list = embed.numpy().tolist()[0]
+
+    index = pinecone.Index('dh')
+    resp = index.query(
+        vector=result_list,
+        top_k=1,
+        include_values=False,
+        include_metadata=True,
+    ).matches[0].metadata
+    return resp['text']
+    
+    
+def restructure(query, ans):
+    api_key = "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"
+    response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",
+    messages=[{
+        "role": "system",
+        "content": f'The answer to the question {query} recieved by performing similarity search on a document gave the answer {ans}. Based on the question, restructure the ans in a suitable answer for the user'
+    }],
+    api_key=api_key,
+    temperature=1,
+    max_tokens=256,
+    top_p=1,
+    frequency_penalty=0,
+    presence_penalty=0
+    )
+    return response.choices[0].message.content
 
     
 def test():
@@ -180,4 +155,4 @@ def language_select():
     
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='localhost',port=5000)
