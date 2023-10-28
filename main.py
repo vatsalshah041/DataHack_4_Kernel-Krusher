@@ -27,51 +27,51 @@ global model
 
 #pinecone.create_index("example-index", dimension=128, metric="euclidean", pods=4, pod_type="s1.x1")
 #pinecone.delete_index('dh')
-# def create_index(path):
-#     print('deleting')
-#     pinecone.delete_index('dh')
-#     print('creating')
-#     pinecone.create_index('dh', dimension=768, metric='cosine')
-#     print('loading')
-#     loader = DirectoryLoader(path, glob="./*.pdf", loader_cls=PyPDFLoader)
-#     documents = loader.load()
-#     # loader_cls = PyPDFLoader
-#     # loader = loader_cls(path)
-#     # documents = loader.load()
-#     print('spliting')
+def create_index(path):
+    print('deleting')
+    pinecone.delete_index('dh')
+    print('creating')
+    pinecone.create_index('dh', dimension=768, metric='cosine')
+    print('loading')
+    loader = DirectoryLoader(path, glob="./*.pdf", loader_cls=PyPDFLoader)
+    documents = loader.load()
+    # loader_cls = PyPDFLoader
+    # loader = loader_cls(path)
+    # documents = loader.load()
+    print('spliting')
    
-#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=200)
-#     texts = text_splitter.split_documents(documents)
-#     print('embedding')
-#     embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
-#     print('storing')
-#     db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
-#     print('done')
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=200)
+    texts = text_splitter.split_documents(documents)
+    print('embedding')
+    embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
+    print('storing')
+    db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
+    print('done')
 
-# UPLOAD_FOLDER = 'uploads'
-# ALLOWED_EXTENSIONS = {'pdf'}
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Function to check if a file has a valid extension
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# @app.route('/upload', methods=['POST'])
-# def upload_file():
-#     if 'file' not in request.files:
-#         return redirect(request.url)
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return redirect(request.url)
 
-#     file = request.files['file']
+    file = request.files['file']
 
-#     if file.filename == '':
-#         return redirect(request.url)
+    if file.filename == '':
+        return redirect(request.url)
 
-#     if file and allowed_file(file.filename): 
-#         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-#         file.save(filepath)
-#         return 'File uploaded successfully.'
+    if file and allowed_file(file.filename): 
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+        return 'File uploaded successfully.'
 
-#     return 'Invalid file format. Please upload a PDF file.'
+    return 'Invalid file format. Please upload a PDF file.'
 
 
 # @app.route("/result", methods=["GET", "POST"])
@@ -180,8 +180,4 @@ def language_select():
     
 
 if __name__ == '__main__':
-    # path = "C:\\Users\\Dev Atul Patel\\Downloads\\datalaw\\Untitled folder\\AFFAIRE AVCIOgLU c. TÜRKiYE.pdf"
-    # create_index(path)
-    # print('done')
-    # get_ans(['What was the outcome for the alleged violation of Article 8 in the case of ANAGNOSTAKIS v. GREECE?'])
     app.run(debug=True)
