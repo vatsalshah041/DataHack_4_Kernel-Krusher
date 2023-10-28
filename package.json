@@ -3,8 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "@mui/icons-material": "^5.14.15",
+    "@mui/material": "^5.14.15",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.3",
     "@nextui-org/react": "^2.1.13",
     "@nextui-org/system": "^2.0.10",
     "@nextui-org/theme": "^2.1.9",
@@ -12,10 +17,12 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "framer-motion": "^10.16.4",
+    "lucide-react": "^0.290.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
+    "styled-components": "^6.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

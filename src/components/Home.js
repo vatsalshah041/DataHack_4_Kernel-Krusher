@@ -1,153 +1,120 @@
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
-const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
-]
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
+import { Grid,Paper,Box } from '@mui/material'
+import { ScrollShadow, Textarea } from '@nextui-org/react'
+import * as React from 'react';
+import {RadioGroup, Radio} from "@nextui-org/react";
+import Upload from './Upload';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Slider from '@mui/material/Slider';
 
 export default function Home() {
+  const [selected, setSelected] = React.useState("English");
+  const marks = [
+    {
+      value: 0,
+      label: '0',
+    },
+    {
+      value: 20,
+      label: '20',
+    },
+    {
+      value: 40,
+      label: '40',
+    },
+    {
+      value: 60,
+      label: '60',
+    },{
+      value: 80,
+      label: '80',
+    },
+    {
+      value: 100,
+      label: '100+',
+    },
+  ];
+  function valuetext(value) {
+    return `${value}°C`;
+  }
+  
+  function valueLabelFormat(value) {
+    return marks.findIndex((mark) => mark.value === value) + 1;
+  }
   return (
-    <Disclosure as="nav" className="bg-gray-800">
-      {({ open }) => (
-        <>
-          <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="relative flex h-16 items-center justify-between">
-              <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-                {/* Mobile menu button*/}
-                <Disclosure.Button className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                  <span className="absolute -inset-0.5" />
-                  <span className="sr-only">Open main menu</span>
-                  {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </Disclosure.Button>
-              </div>
-              <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                <div className="flex flex-shrink-0 items-center">
-                  <img
-                    className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500"
-                    alt="Your Company"
-                  />
-                </div>
-                <div className="hidden sm:ml-6 sm:block">
-                  <div className="flex space-x-4">
-                    {navigation.map((item) => (
-                      <a
-                        key={item.name}
-                        href={item.href}
-                        className={classNames(
-                          item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                          'rounded-md px-3 py-2 text-sm font-medium'
-                        )}
-                        aria-current={item.current ? 'page' : undefined}
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                <button
-                  type="button"
-                  className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                >
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
+    <div style={{backgroundColor:""}}>
+      <Grid container sx={{backgroundColor:""}}>
+        <Grid item md={12} sx={{paddingTop:5,paddingLeft:50,justifyContent:"center",alignItems:"center"}}>
+            <Upload/>
+        </Grid>
+        <Grid item md={6} sx={{padding:4}}>
+        <Textarea
+        // maxRows={30}
+        label="Your Translated pdf is here:"
+        labelPlacement="outside"
+        placeholder=""
+        style={{}}
+        minRows={100}
+      />
+        </Grid>
+        <Grid item md={6} sx={{padding:4}}>
+          <Grid container>
+            <Grid item md={12}>
+            <Textarea
+        maxRows={2}
+        label="Question"
+        labelPlacement="outside"
+        placeholder="Enter your Question here"
+        style={{}}
+      />
+            </Grid>
+            <Grid item md={12} sx={{paddingTop:"5px",margindTop:5}}>
+            <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography>Filter </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+        <Box sx={{border:"2px solid black",borderRadius:"4px",padding:2}}>
+              <RadioGroup
+                  label="Select the language you want the answer in"
+                  orientation="horizontal"
+                  value={selected}
+                  onChange={(e) => setSelected(e.target.value)}
+              >
+                <Radio value="English">English</Radio>
+                <Radio value="Spanish">Spanish</Radio>
+                <Radio value="French">French</Radio>
+              </RadioGroup>
+              
+              <Box sx={{ width: 500 ,padding:2}}>
+                Word Limit
+                <Slider
+                  aria-label="Always visible"
+                  defaultValue={80}
+                  getAriaValueText={valuetext}
+                  step={10}
+                  marks={marks}
+                  valueLabelDisplay="on"
+                />
+              </Box>
+                </Box>
+        </AccordionDetails>
+      </Accordion>
+              
+            </Grid>
+          </Grid>
+        
 
-                {/* Profile dropdown */}
-                <Menu as="div" className="relative ml-3">
-                  <div>
-                    <Menu.Button className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                      <span className="absolute -inset-1.5" />
-                      <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt=""
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Your Profile
-                          </a>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Settings
-                          </a>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Sign out
-                          </a>
-                        )}
-                      </Menu.Item>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              </div>
-            </div>
-          </div>
-
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
-                <Disclosure.Button
-                  key={item.name}
-                  as="a"
-                  href={item.href}
-                  className={classNames(
-                    item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block rounded-md px-3 py-2 text-base font-medium'
-                  )}
-                  aria-current={item.current ? 'page' : undefined}
-                >
-                  {item.name}
-                </Disclosure.Button>
-              ))}
-            </div>
-          </Disclosure.Panel>
-        </>
-      )}
-    </Disclosure>
+        </Grid>
+      </Grid>
+    </div>
   )
 }
