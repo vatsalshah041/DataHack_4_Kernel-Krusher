@@ -11,6 +11,8 @@ from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -84,25 +86,11 @@ def result():
         user_query = request.form['query']
         print(user_query)
         response = get_ans(user_query)
+
         return jsonify({"response": str(response)})
     except Exception as e:
         return jsonify({"error": str(e)})
 
-
-@app.route("/restructure", methods=["POST","GET"])
-def restructure():
-    response = request.get('/result')
-    if response.status_code == 200:
-        query = request.get_json().get("query")  # Get the query from the request JSON
-        resp = request.get_json().get("resp")  # Get the response from the request JSON
-
-    if not query or not resp:
-        return jsonify({"error": "Both query and resp are required for restructuring"})
-
-    # Call the restructure function and get the restructured answer
-    restructured_answer = restructure(query, resp)
-
-    return jsonify({"restructured_answer": restructured_answer})
 
 model = SentenceTransformer("sentence-transformers/multi-qa-mpnet-base-dot-v1")
 # Load or create your Faiss index and make sure it's available in the 'index' variable.
@@ -110,27 +98,33 @@ model = SentenceTransformer("sentence-transformers/multi-qa-mpnet-base-dot-v1")
 def get_ans(query):
     embed = model.encode(query, convert_to_tensor=True)
 
-    # result_list = embed.numpy().astype(float).tolist()
-    result_list = [float(element) for element in embed.numpy()[0]]
-    # result_list = embed.numpy().tolist()[0]
-
+    result_list = embed.numpy().astype(float).tolist()
     index = pinecone.Index('dh')
-    resp = index.query(
+    response = index.query(
         vector=result_list,
         top_k=1,
         include_values=False,
         include_metadata=True,
-    ).matches[0].metadata
-    return resp['text']
+    ).matches
+
+    if response:
+        resp = response[0].metadata
+        resp = resp['text']
+        restructured_resp = restructure(query,resp)
+        return jsonify({"success":True,"output":restructured_resp})
+    else:
+        return "No matching result found"
+
     
     
 def restructure(query, ans):
+    print("restructuring")
     api_key = "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"
     response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[{
         "role": "system",
-        "content": f'The answer to the question {query} recieved by performing similarity search on a document gave the answer {ans}. Based on the question, restructure the ans in a suitable answer for the user'
+        "content": f"""The response to the query "{query}" was obtained by conducting a similarity search on a document, resulting in the answer: "{ans}". To best cater to the user's query, restructure this answer in a more suitable format.""",
     }],
     api_key=api_key,
     temperature=1,
