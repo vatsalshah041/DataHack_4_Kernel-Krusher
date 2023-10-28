@@ -5,17 +5,20 @@ import {useState} from 'react'
 export default function Upload() {
         const [files,setFiles]=React.useState([])
         const handlechange=(e)=>{
-            const files=e.target.files
+            const newfiles=e.target.files
+            console.log('hi');
             console.log(files)
-            setFiles(files)
+            setFiles([...files, ...newfiles]);
         }
 
         function handleUplaod(){
             const formData=new FormData()
             for(let i=0;i<files.length;i++){
-                formData.append(`file${i}`,files[i])
+                console.log(files[i]);
+                formData.append("file",files[i])
             }
             console.log(formData);
+            
         }
 
   return (
