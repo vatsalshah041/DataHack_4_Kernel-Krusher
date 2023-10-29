@@ -11,6 +11,7 @@ from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from sentence_transformers import SentenceTransformer
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -66,22 +67,47 @@ def allowed_file(filename):
 def root():
     return jsonify({'home':True})
 
-@app.route('/upload_file', methods=['POST','GET'])
-def upload_file():
-    if 'file' not in request.files:
-        return redirect(request.url)
+UPLOAD_FOLDER = 'static\\uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+ALLOWED_EXTENSIONS = set(['txt', 'pdf'])
 
-    file = request.files['file']
+def allowed_file(filename, allowed_extensions):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-    if file.filename == '':
-        return redirect(request.url)
+@app.route('/upload', methods=['POST'])
+def upload_files():
+    if 'files[]' not in request.files:
+        resp = jsonify({'message' : 'No file part in the request'})
+        resp.status_code = 400
+        return resp
+ 
+    files = request.files.getlist('files[]')
+     
+    errors = {}
+    success = False 
 
-    if file and allowed_file(file.filename): 
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
-        return 'File uploaded successfully.'
-
-    return 'Invalid file format. Please upload a PDF file.'
+    for file in files:      
+        if file and allowed_file(file.filename,ALLOWED_EXTENSIONS):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            success = True
+        else:
+            errors[file.filename] = 'File type is not allowed'
+ 
+    if success and errors:
+        errors['message'] = 'File(s) successfully uploaded'
+        resp = jsonify(errors)
+        resp.status_code = 500
+        return resp
+    if success:
+        resp = jsonify({'message' : 'Files successfully uploaded'})
+        resp.status_code = 201
+        return resp
+    else:
+        resp = jsonify(errors)
+        resp.status_code = 500
+        return resp
 
 @app.route('/result', methods=['POST','GET'])
 def result():
