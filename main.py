@@ -76,8 +76,8 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf'])
 def allowed_file(filename, allowed_extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-@app.route('/upload', methods=['POST'])
-def upload_files():
+@app.route('/upload_trans', methods=['POST'])
+def upload_trans():
     if 'files[]' not in request.files:
         resp = jsonify({'message' : 'No file part in the request'})
         resp.status_code = 400
@@ -91,10 +91,13 @@ def upload_files():
     for file in files:      
         if file and allowed_file(file.filename,ALLOWED_EXTENSIONS):
             filename = secure_filename(file.filename)
+           # ...
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             success = True
         else:
             errors[file.filename] = 'File type is not allowed'
+    
+    create_index('./static/uploads')
  
     if success and errors:
         errors['message'] = 'File(s) successfully uploaded'
