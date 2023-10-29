@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from easygoogletranslate import EasyGoogleTranslate
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 @app.route('/translate', methods=['POST'])
 def translate():
     if request.method == 'POST':
