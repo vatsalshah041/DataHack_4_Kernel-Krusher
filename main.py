@@ -14,6 +14,7 @@ from sentence_transformers import SentenceTransformer
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from flask_cors import CORS
+import multiprocessing
 load_dotenv()
 
 # OPENAI_API_KEY = os.getenv("OPENAI_KEY")
@@ -56,6 +57,36 @@ def create_index(path):
     db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
     print('done')
 
+def create_index_2(path):
+    loader_cls = PyPDFLoader
+    loader = loader_cls(path)
+    documents = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=300)
+    texts = text_splitter.split_documents(documents)
+    embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
+    print('storing')
+    db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
+    print('done')
+
+def name_all_pdfs(path):
+    """this path is folder's path"""
+    array = []
+    for filename in os.listdir(path):
+        f = os.path.join(path, filename)
+    array.append(f)
+    call_multi(array)
+
+def process_pdfs(pdf_path):
+    create_index_2(pdf_path)
+
+def call_multi(array):
+    """array of paths of pdfs"""
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+
+    pool.map(process_pdfs, array)
+    pool.close()
+    pool.join()
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -96,9 +127,9 @@ def upload_trans():
             success = True
         else:
             errors[file.filename] = 'File type is not allowed'
-    
-    create_index('./static/uploads')
- 
+
+    name_all_pdfs(path='./static/uploads')
+
     if success and errors:
         errors['message'] = 'File(s) successfully uploaded'
         resp = jsonify(errors)
