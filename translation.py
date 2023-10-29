@@ -31,4 +31,4 @@ def translate():
             return jsonify({'error': error_message}), 500  # Return an error response with status code 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=8000)
