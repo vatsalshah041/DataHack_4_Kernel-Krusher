@@ -22,7 +22,7 @@ psychiatrique."""
 
 
 def create_pdf(text_array):
-    pdf_file = "translation.pdf"
+    pdf_file = "D:\\DATAHACK\\Datahack2024\\translated_pdfs\\translation2"
     doc = SimpleDocTemplate(pdf_file, pagesize=letter)
 
     elements = []
@@ -74,22 +74,20 @@ def get_documents(pdf_path):
     return texts
 
 
+def translate_docs(path='D:\\DATAHACK\\Datahack2024\\SearchEnginePDFs\\pdfs\\AFFAIRE C.P. ET M.N. c. FRANCE.pdf'):
+    chunk_of_texts = get_documents(path)
 
-# path = os.path.join('Datahack2024','SearchEnginePDFs','pdfs','AFFAIRE A.A.K. c. TÜRKiYE.pdf')
-path = 'D:\\DATAHACK\\Datahack2024\\SearchEnginePDFs\\pdfs\\AFFAIRE A.A.K. c. TÜRKiYE.pdf'
-chunk_of_texts = get_documents(path)
+    translation_service = TranslationService(src="fr", trg="en")
+    translation_tasks = [translation_service.translate_texts([text]) for text in chunk_of_texts]
 
-translation_service = TranslationService(src="fr", trg="en")
-translation_tasks = [translation_service.translate_texts([text]) for text in chunk_of_texts]
+    # Run the tasks asynchronously
+    loop = asyncio.get_event_loop()
+    translated_texts = loop.run_until_complete(asyncio.gather(*translation_tasks))
+    translated_texts = [texts[0]+"\n" for texts in translated_texts]
 
-# Run the tasks asynchronously
-loop = asyncio.get_event_loop()
-translated_texts = loop.run_until_complete(asyncio.gather(*translation_tasks))
-translated_texts = [texts[0]+"\n" for texts in translated_texts]
+    create_pdf(translated_texts)
 
-create_pdf(translated_texts)
-
-
+translate_docs()
 
 
 
