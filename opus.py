@@ -43,7 +43,6 @@ class TranslationService:
 
     async def Fr2En(self, text):
         batch = self.tokenizer([text], return_tensors="pt")
-        print("****")
         generated_ids = self.model.generate(**batch)
         output = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
         return output
@@ -79,23 +78,18 @@ def get_documents(pdf_path):
 # path = os.path.join('Datahack2024','SearchEnginePDFs','pdfs','AFFAIRE A.A.K. c. TÜRKiYE.pdf')
 path = 'D:\\DATAHACK\\Datahack2024\\SearchEnginePDFs\\pdfs\\AFFAIRE A.A.K. c. TÜRKiYE.pdf'
 chunk_of_texts = get_documents(path)
-print(len(chunk_of_texts))
 
-print("translating")
-start = time.time()
-# fr_translate = asyncio.run(translate_texts(chunk_of_texts[:10]))
 translation_service = TranslationService(src="fr", trg="en")
-
-translation_tasks = [translation_service.translate_texts([text]) for text in chunk_of_texts[:5]]
+translation_tasks = [translation_service.translate_texts([text]) for text in chunk_of_texts]
 
 # Run the tasks asynchronously
 loop = asyncio.get_event_loop()
 translated_texts = loop.run_until_complete(asyncio.gather(*translation_tasks))
-
-end = time.time() - start
-print(f"------------------------ {end} ----------------------")
+translated_texts = [texts[0]+"\n" for texts in translated_texts]
 
 create_pdf(translated_texts)
+
+
 
 
 
