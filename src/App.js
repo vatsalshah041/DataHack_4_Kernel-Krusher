@@ -2,12 +2,12 @@
 import './App.css';
 import Home from './components/Home';
 // import { Navbar } from './components/Navbar';
-const { Navbar } = require('./components/Navbar'); // Replace with the actual path to your Navbar component
+import Navbars from './components/Navbars';// Replace with the actual path to your Navbar component
 
 function App() {
   return (
     <div style={{backgroundColor:"#ffe28c"}}>
-      {/* <Navbar/> */}
+      <Navbars/>
       <Home/>
     </div>
   );

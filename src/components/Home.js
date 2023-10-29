@@ -10,9 +10,13 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Slider from '@mui/material/Slider';
-
+import { Button } from '@nextui-org/react';
+import axios from 'axios';
 export default function Home() {
   const [selected, setSelected] = React.useState("English");
+  const [que,setQue]=React.useState("")
+  const [ans,setAns]=React.useState("")
+  const [trans,setTrans]=React.useState("")
   const marks = [
     {
       value: 0,
@@ -45,6 +49,75 @@ export default function Home() {
   function valueLabelFormat(value) {
     return marks.findIndex((mark) => mark.value === value) + 1;
   }
+let t=''
+  const translateque=(t)=>{
+    let data = JSON.stringify({
+        "text_to_translate": t,
+      });
+
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: 'http://127.0.0.1:8000/translate',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        data : data
+      };
+
+      async function makeRequest() {
+        try {
+          const response = await axios.request(config);
+          console.log((response.data));
+          setAns(response.data);
+        }
+        catch (error) {
+          console.log(error);
+        }
+      }
+
+      makeRequest();
+  }
+
+  const returnque=()=>{
+    // console.log("t:",t);
+const FormData = require('form-data');
+let data1 = new FormData();
+data1.append('query', que);
+
+let config1 = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: 'http://127.0.0.1:5000/result',
+  // headers: { 
+  //   ...data1.getHeaders()
+  // },
+  data : data1
+};
+
+async function makeRequest1() {
+  try {
+    const response = await axios.request(config1);
+    console.log("t:",response.data)
+    t=response.data.response;
+    translateque(t);
+    // return response.data;
+  }
+  catch (error) {
+    console.log(error);
+  }
+}
+makeRequest1();
+
+  }
+  const filter=()=>{
+    console.log(selected);
+    returnque();
+    // console.log(t);
+    
+
+  }
+
   return (
     <div style={{backgroundColor:""}}>
       <Grid container sx={{backgroundColor:""}}>
@@ -53,12 +126,14 @@ export default function Home() {
         </Grid>
         <Grid item md={6} sx={{padding:4}}>
         <Textarea
-        // maxRows={30}
+        maxRows={35}
         label="Your Translated pdf is here:"
         labelPlacement="outside"
         placeholder=""
-        style={{}}
-        minRows={100}
+        style={{height:"425px !important"}}
+        className='textarea'
+        value={trans}
+        // minRows={100}
       />
         </Grid>
         <Grid item md={6} sx={{padding:4}}>
@@ -69,6 +144,8 @@ export default function Home() {
         label="Question"
         labelPlacement="outside"
         placeholder="Enter your Question here"
+        value={que}
+        onChange={(e)=>{setQue(e.target.value);console.log(que);}}
         style={{}}
       />
             </Grid>
@@ -110,6 +187,19 @@ export default function Home() {
       </Accordion>
               
             </Grid>
+            <Grid item md={12} sx={{paddingTop:"5px",margindTop:10,display: "flex", justifyContent: "flex-end", alignItems: "center"}}>
+              <Button onClick={filter} color="primary">Submit</Button>
+            </Grid>
+          </Grid>
+          <Grid item md={12}>
+          <Textarea
+        // maxRows={30}
+        label="The answer to your query is this:"
+        labelPlacement="outside"
+        placeholder=""
+        style={{}}
+        value={ans?(selected==="English"?ans.original_text:selected==="Spanish"?ans.spanish_translation:selected==="French"?ans.french_translation:ans.original_text):""}
+        minRows={100}/>
           </Grid>
         
 
