@@ -126,13 +126,13 @@ makeRequest1();
         </Grid>
         <Grid item md={6} sx={{padding:4}}>
         <Textarea
-        maxRows={35}
+        maxRows={27}
         label="Your Translated pdf is here:"
         labelPlacement="outside"
         placeholder=""
         style={{height:"425px !important"}}
         className='textarea'
-        value={trans}
+        // value={trans}
         // minRows={100}
       />
         </Grid>
