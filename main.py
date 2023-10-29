@@ -13,6 +13,7 @@ from langchain.embeddings import SentenceTransformerEmbeddings
 from sentence_transformers import SentenceTransformer
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from flask_cors import CORS
 load_dotenv()
 
 # OPENAI_API_KEY = os.getenv("OPENAI_KEY")
@@ -20,7 +21,7 @@ load_dotenv()
 OPENAI_API_KEY = ''
 
 app = Flask(__name__)
-
+CORS(app)
 pinecone.init(      
 	api_key='b0b2574e-0973-49a8-a210-196772f9d1b2',      
 	environment='gcp-starter'      
