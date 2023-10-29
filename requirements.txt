@@ -22,3 +22,6 @@ pypdf
 openai
 
 asyncio
+reportlab
+
+sacremoses.
