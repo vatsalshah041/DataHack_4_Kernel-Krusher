@@ -14,6 +14,10 @@ from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 load_dotenv()
 
+# OPENAI_API_KEY = os.getenv("OPENAI_KEY")
+# openai.api_key = OPENAI_API_KEY
+OPENAI_API_KEY = ''
+
 app = Flask(__name__)
 
 pinecone.init(      
@@ -111,7 +115,7 @@ def get_ans(query):
         resp = response[0].metadata
         resp = resp['text']
         restructured_resp = restructure(query,resp)
-        return jsonify({"success":True,"output":restructured_resp})
+        return restructured_resp
     else:
         return "No matching result found"
 
@@ -119,7 +123,8 @@ def get_ans(query):
     
 def restructure(query, ans):
     print("restructuring")
-    api_key = "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"
+    openai.api_key = OPENAI_API_KEY
+    api_key = OPENAI_API_KEY
     response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[{
