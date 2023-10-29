@@ -10,6 +10,7 @@ from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import SentenceTransformerEmbeddings
 from sentence_transformers import SentenceTransformer
+import multiprocessing
 
 openai.api_key = ''
 pinecone.init(      
@@ -45,6 +46,17 @@ def create_index(path):
     print('storing')
     db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
     print('done')
+    
+def create_index_2(path):
+  loader_cls = PyPDFLoader
+  loader = loader_cls(path)
+  documents = loader.load()
+  text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=300)
+  texts = text_splitter.split_documents(documents)
+  embeddings = SentenceTransformerEmbeddings(model_name="multi-qa-mpnet-base-dot-v1")
+  print('storing')
+  db = Pinecone.from_documents(texts, embeddings, index_name = 'dh')
+  print('done')
 
 
 def get_ans(query):
@@ -80,10 +92,27 @@ def restructure(query, ans):
 
   return response.choices[0].message.content
 
+def process_pdfs(pdf_path):
+    create_index_2(pdf_path)
+    
+def call_multi(array):
+  pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+
+  pool.map(process_pdfs, array)
+  pool.close()
+  pool.join()
+    
+def name_all_pdfs(path):
+  array = []
+  for filename in os.listdir(path):
+    f = os.path.join(path, filename)
+    array.append(f)
+  call_multi(array)
+
 if __name__ == '__main__':
-    # path = "C:\\Users\\Hp\\Desktop\\Code\\Datahack\\case"
-    # create_index(path)
-    query = 'What was the outcome for the alleged violation of Article 8 in the case of ANAGNOSTAKIS v. GREECE?'
-    print('done')
-    make_ans = get_ans(query)
-    print(restructure(query,make_ans))
+    path = "C:\\Users\\Hp\\Desktop\\Code\\Datahack\\case"
+    name_all_pdfs(path)
+    # query = 'What was the outcome for the alleged violation of Article 8 in the case of ANAGNOSTAKIS v. GREECE?'
+    # print('done')
+    # make_ans = get_ans(query)
+    # print(restructure(query,make_ans))
